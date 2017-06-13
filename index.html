@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <script src="vue.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.16.1/axios.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <title>sandbox</title>
+</head>
+<body>
+    <div id="app">
+        <user-list v-bind:data="users"></user-list>
+        <global-cmp message="salut enfant !"></global-cmp>
+        <hr>
+        <my-cmp></my-cmp>
+        <br>
+        <my-cmp></my-cmp>        
+    </div>
+    <script>
+        Vue.component('global-cmp', {
+            template: '<div>composant global</div>',
+            props: ['message']
+        });
+        Vue.component('user-list', {
+            template: '<div>\
+                <ul><li v-for="user in data">{{user.username}}</li></ul>\
+                </div>',
+            props: ['data']
+        });
+
+
+        var myCmp = { 
+            data: function() {
+                return {
+                    currentNumber: Math.floor(Math.random() * 10)
+                }
+            },        
+            template: '<p>composant local. Le chiffre du moment : {{ currentNumber }} \
+                        <button v-on:click="refreshNumber">rafraîchir</button></p>',
+            methods: {
+                refreshNumber() {
+                    this.currentNumber = Math.floor(Math.random() * 10);
+                }
+            }
+        } ;
+
+        var vm = new Vue({
+            el: '#app',
+            components: {'my-cmp': myCmp},
+            data: {
+                users: [],
+                postsUrl: 'https://jsonplaceholder.typicode.com/users'
+            },
+            created: function() {
+                axios.get(this.postsUrl)
+                        .then(function(response) {
+                            console.log(response);
+                            vm.users = response.data;
+                        });
+            }
+        });
+    </script>
+</body>
+</html>
